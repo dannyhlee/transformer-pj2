@@ -6,6 +6,7 @@ A spark runner file
 #### II. Done
 1. Read in json
 2. Apply nested schema
+3. Read and write to HDFS
 
 figure a:
 ```
