@@ -2,13 +2,11 @@ package sparkRunner
 
 import java.net.URI
 
+import org.apache.log4j.{Level, Logger}
 import org.apache.spark
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.explode
 import org.apache.spark.sql.types._
-import org.apache.hadoop.fs.{FileSystem, Path}
-
-import scala.collection.mutable
 
 object Runner {
 
@@ -64,15 +62,6 @@ object Runner {
           .add("url", StringType)
         ))
 
-    val singleTrendSchema = new StructType()
-      .add("trends", ArrayType(new StructType()
-        .add("name", StringType)
-        .add("promoted_content", StringType)
-        .add("query", StringType)
-        .add("tweet_volume", LongType)
-        .add("url", StringType)
-      ))
-
     val df = spark.read.schema(trendSchema).json("input-old")
     df.printSchema()
     df.show(false)
@@ -83,27 +72,6 @@ object Runner {
 
     val trendsDF=spark.sql("select trends from trends")
     trendsDF.show(false)
-
-    val fs = FileSystem.get(new URI("hdfs://localhost:9000/"), spark.sparkContext.hadoopConfiguration)
-    println(spark.sparkContext.hadoopConfiguration)
-    val fsStatus = fs.listStatus(new Path("hdfs://localhost:9000/"))
-    fsStatus.foreach(x=> println(x.getPath))
-
-    val outputPath = new Path("/user/spark/trends")
-    println(fs.exists(outputPath), outputPath)
-    if (fs.exists(outputPath))
-      fs.delete(outputPath, true)
-
-    println("Writing...")
-    trendsDF.rdd.saveAsTextFile("hdfs://localhost:9000/user/spark/trends")
-    println("Finished writing.")
-
-    println("Reading...")
-    val dfFromFile = spark.read.text("hdfs://localhost:9000/user/spark/trends")
-    println("Finished Reading.")
-
-    println("dfFromFile output")
-    dfFromFile.show(false)
 
   }
 }
