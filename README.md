@@ -7,6 +7,8 @@ A spark runner file
 1. Read in json
 2. Apply nested schema
 3. Read and write to HDFS
+4. Create account at https://cloud.mongodb.com/
+5. Create cluster, db user and load sample data
 
 figure a:
 ```
@@ -28,10 +30,11 @@ figure a:
 
 #### III. Doing
 1. SQL queries
-2. Process data, produce single trend object (IV.1)
+2. Process data, produce single trend case class object (IV.1)
 3. Generate SQL - single topic rank change over time in a specific geo
 4. Generate SQL - location change of a topic over time
 5. Generate index measuring proximity between geos
+6. Connect MongoDb
 
 #### IV. Doable
 1. Produce (date, location, single-trend, rank) objects 
