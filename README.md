@@ -11,6 +11,7 @@ A spark runner file
 5. Create cluster, db user and load sample data (11/14)
 6. Connected MongoDb - code in src/MongoDB.txt (11/14) 
 7. Added TrendObj case class (name, location, rank, as_of)
+8. Extract Trend names from Nested Struct(11/15)
 
 figure a:
 ```
@@ -40,7 +41,7 @@ figure a:
 
 #### IV. Doable
 1. Produce (date, location, single-trend, rank) objects 
-  a. Analyze change of rank over time
-  b. Analyze rank and rank change between locations over time
+   * Analyze change of rank over time
+   * Analyze rank and rank change between locations over time
 2. Chart change graphically per topic
 3. Chart location list that changes over time

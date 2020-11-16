@@ -1,11 +1,11 @@
 package sparkRunner
 
-import java.net.URI
+//import java.net.URI
 
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.explode
+//import org.apache.log4j.{Level, Logger}
+//import org.apache.spark
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
 object Runner {
@@ -29,7 +29,7 @@ object Runner {
 //    raw_df.show(truncate=false)
 
     /**
-     * '''raw_df.show()''' - ''Spark generated schema''
+     * '''raw_df.printSchema()''' - ''Spark generated schema''
      * <pre>
      *     root
      * |-- as_of: string (nullable = true)
@@ -62,16 +62,40 @@ object Runner {
           .add("url", StringType)
         ))
 
-    val df = spark.read.schema(trendSchema).json("input-old")
-    df.printSchema()
+    val df = spark.read.schema(trendSchema).json("test.json")
+//    df.printSchema()
     df.show(false)
 
     df.createOrReplaceTempView("trends")
-    val locationsDF=spark.sql("select locations from trends")
-    locationsDF.show(false)
+//    val locationsDF=spark.sql("select locations from trends")
+//    locationsDF.show(false)
 
-    val trendsDF=spark.sql("select trends from trends")
+    val locationTrendsDF = df.select($"locations.name", explode($"trends"))
+    locationTrendsDF.show(false)
+
+    val trendsDF = df.select(explode($"trends"))
+//      .select($"name")
+    trendsDF.printSchema()
     trendsDF.show(false)
+
+    val res = df.withColumn("trends", explode($"trends"))
+      .select("*")
+
+    res.show(false)
+
+    val res2 = res.select(res.col("trends.name"))
+
+    res2.show(false)
+
+//    val res3 = res2.collect.map(_.toSeq)
+//    this doesn't work, wrappedArray -^
+//    val res3 = res2.collect.map(row => row.getString(0))
+//      this works -^
+    val res3 = res2.collect.flatMap(_.toSeq)
+//      this works -^
+
+    res3.foreach(println)
+    println(res3.length)
 
   }
 }
