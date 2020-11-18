@@ -1,5 +1,7 @@
 package sparkRunner
 
+import java.io.{BufferedWriter, File, FileNotFoundException, FileWriter, IOException, PrintWriter}
+
 import scala.collection.mutable
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Row, SparkSession}
@@ -7,6 +9,18 @@ import org.apache.spark.sql.{Row, SparkSession}
 object Runner {
 
   def main(args: Array[String]): Unit = {
+
+//    val argsList = args.toList
+//
+//    argsList match {
+//      case List(in, out) => println(s"$in $out")
+//      case List(one) => println("Syntax: runner [input] [output-file]")
+//      case List() => println("Using ./input and ./output.txt")
+//    }
+
+    // If no input directory exit or no files exit
+    // if output file exists exit, append timestamp and proceed
+
 
     val spark = SparkSession.builder()
       .appName("Spark Runner")
@@ -51,7 +65,7 @@ object Runner {
           .add("url", StringType)
         ))
 
-    val df = spark.read.schema(trendSchema).json("input")
+    val df = spark.read.schema(trendSchema).json("input-old")
 
 //    df.printSchema()
 //    df.show(false)
@@ -131,6 +145,33 @@ object Runner {
 //        println(location, row.getAs[String]("as_of"))
 //      })
 
+    def writeFile(lines: List[(Any, String, String, Int, Any)]) {
+      try {
+        val file = new File("output.txt")
+
+        if (!file.exists) file.createNewFile
+
+        val file_writer = new FileWriter(file, true)
+
+        val buffered_writer = new BufferedWriter(file_writer)
+        for (line <- lines) {
+          buffered_writer
+            .write("\"%s\",\"%s\",\"%s\",%d,%d\n"
+              .format(
+                line._1.toString,
+                line._2,
+                line._3,
+                line._4,
+                { if (null == line._5) 0 else line._5.toString.toInt }
+              ))
+        }
+        buffered_writer.close()
+      } catch {
+        case e: IOException => println("IOException: Could not write to file")
+      }
+    }
+
+    println("---------------------"+df.count())
     val colData = df.select("*").cache()
 
     colData.foreach(row => {
@@ -145,15 +186,17 @@ object Runner {
       val trends = row
         .getAs[mutable.WrappedArray[Row]](3)
         .zipWithIndex.map { case (struct, index) =>
+        // trend text, location, time stamp, rank, tweet volume
         (struct(0), location, as_of, index + 1, struct(3))
       }.toList
 //      (2020-11-12T01:15:14Z,Philadelphia,WrappedArray(127314, 38722, 41754, 429908, 203143, null, null, 12027, null, 38764, 36259, 14979, 37228, 25952, 60866, 17485, 21783, 15384, 21522, 30010, null, 20520, 11154, null, null, 31253, 158944, 19674, null, null, 427613, 14884, null, 13771, 109150, null, null, null, 24538, null, null, null, 16161, 2315388, 63185, null, null, 21682, null, null))
 //      val trend_names = row.getAs[mutable.WrappedArray[Row]](3).map(struct => struct(0)).toList
 //      (2020-11-12T01:15:14Z,Philadelphia,List(#YouTubeDOWN, Harden, Westbrook, #VeteransDay, Alaska, Journey Brown, #AEWDynamite, #CMAawards, #WWENXT, Rockets, Mississippi, Clippers, WWII, Lakers, Cuomo, Knicks, Cy Young, Ron Klain, Toobin, RIP MO3, SNKRS, Bauer, DeWine, Sonny Gray, Kawhi, Ticketmaster, My YouTube, Reds, RIP YouTube, Them 11s, BIEBER, Damn Mo3, Darvish, Chris Paul, YouTubeTV, My Lai, Sydal, Johnny Gargano, Pending, Eastern Michigan, Morey, #OneChicago, #TrumpIsPathetic, #AMAs, #BTSMusicInnovator, #TheMaskedSinger, #ChicagoMed, #OperationWarpConcede, #CheerUpDonaldTrump, #littlefreaks))
 
-      println(trends)
+      writeFile(trends)
 
     })
+
     spark.stop()
 //    |-- as_of: string (nullable = true)
 //    |-- created_at: string (nullable = true)
