@@ -32,6 +32,19 @@ object Runner {
 
     val df = spark.read.schema(trendSchema).json("input-old")
 
+    val file = new File("output.csv")
+
+    if (!file.exists) file.createNewFile
+
+    val file_writer = new FileWriter(file, true)
+
+    val buffered_writer = new BufferedWriter(file_writer)
+
+    buffered_writer
+      .write("\"Trend Text\",\"Location\",\"Timestamp\",\"Rank\",\"Tweet Volume\"\n")
+
+    buffered_writer.close()
+
     def writeFile(lines: List[(Any, String, String, Int, Any)]) {
       try {
         val file = new File("output.csv")
@@ -41,9 +54,6 @@ object Runner {
         val file_writer = new FileWriter(file, true)
 
         val buffered_writer = new BufferedWriter(file_writer)
-
-        buffered_writer
-          .write("\"Trend Text\",\"Location\",\"Timestamp\",\"Rank\",\"Tweet Volume\"\n")
 
         for (line <- lines) {
           buffered_writer
