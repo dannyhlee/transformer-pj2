@@ -1,0 +1,234 @@
+package sparkRunner
+
+import java.io.{BufferedWriter, File, FileNotFoundException, FileWriter, IOException, PrintWriter}
+
+import scala.collection.mutable
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.{Row, SparkSession}
+
+object Runner {
+
+  def main(args: Array[String]): Unit = {
+
+//    val argsList = args.toList
+//
+//    argsList match {
+//      case List(in, out) => println(s"$in $out")
+//      case List(one) => println("Syntax: runner [input] [output-file]")
+//      case List() => println("Using ./input and ./output.txt")
+//    }
+
+    // If no input directory exit or no files exit
+    // if output file exists exit, append timestamp and proceed
+
+
+    val spark = SparkSession.builder()
+      .appName("Spark Runner")
+      .master("local[*]")
+      .getOrCreate()
+
+//    spark.sparkContext.setLogLevel("WARN")
+
+
+//    val raw_df = spark.read.json("test.json")
+//    raw_df.show(truncate=false)
+//    raw_df.printSchema() - Spark generated schema
+//      <pre>
+//          root
+//      |-- as_of: string (nullable = true)
+//      |-- created_at: string (nullable = true)
+//      |-- locations: array (nullable = true)
+//      |    |-- element: struct (containsNull = true)
+//      |    |    |-- name: string (nullable = true)
+//      |    |    |-- woeid: long (nullable = true)
+//      |-- trends: array (nullable = true)
+//      |    |-- element: struct (containsNull = true)
+//      |    |    |-- name: string (nullable = true)
+//      |    |    |-- promoted_content: string (nullable = true)
+//      |    |    |-- query: string (nullable = true)
+//      |    |    |-- tweet_volume: long (nullable = true)
+//      |    |    |-- url: string (nullable = true)
+//      </pre>
+
+    val trendSchema = new StructType()
+      .add("as_of", StringType)
+      .add("created_at", StringType)
+      .add("locations", ArrayType(new StructType()
+          .add("name", StringType)
+          .add("woeid", LongType)
+        ))
+        .add("trends", ArrayType(new StructType()
+          .add("name", StringType)
+          .add("promoted_content", StringType)
+          .add("query", StringType)
+          .add("tweet_volume", LongType)
+          .add("url", StringType)
+        ))
+
+    val df = spark.read.schema(trendSchema).json("input-old")
+
+//    df.printSchema()
+//    df.show(false)
+
+//    df.show output:
+//    +--------------------+--------------------+-------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+//    |as_of               |created_at          |locations                |trends                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+//    +--------------------+--------------------+-------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+//    |2020-11-12T01:15:14Z|2020-11-10T13:08:57Z|[[Philadelphia, 2471217]]|[[#YouTubeDOWN,, %23YouTubeDOWN, 127314, http://twitter.com/search?q=%23YouTubeDOWN], [Harden,, Harden, 38722, http://twitter.com/search?q=Harden], [Westbrook,, Westbrook, 41754, http://twitter.com/search?q=Westbrook], [#VeteransDay,, %23VeteransDay, 429908, http://twitter.com/search?q=%23VeteransDay], [Alaska,, Alaska, 203143, http://twitter.com/search?q=Alaska], [Journey Brown,, %22Journey+Brown%22,, http://twitter.com/search?q=%22Journey+Brown%22], [#AEWDynamite,, %23AEWDynamite,, http://twitter.com/search?q=%23AEWDynamite], [#CMAawards,, %23CMAawards, 12027, http://twitter.com/search?q=%23CMAawards], [#WWENXT,, %23WWENXT,, http://twitter.com/search?q=%23WWENXT], [Rockets,, Rockets, 38764, http://twitter.com/search?q=Rockets], [Mississippi,, Mississippi, 36259, http://twitter.com/search?q=Mississippi], [Clippers,, Clippers, 14979, http://twitter.com/search?q=Clippers], [WWII,, WWII, 37228, http://twitter.com/search?q=WWII], [Lakers,, Lakers, 25952, http://twitter.com/search?q=Lakers], [Cuomo,, Cuomo, 60866, http://twitter.com/search?q=Cuomo], [Knicks,, Knicks, 17485, http://twitter.com/search?q=Knicks], [Cy Young,, %22Cy+Young%22, 21783, http://twitter.com/search?q=%22Cy+Young%22], [Ron Klain,, %22Ron+Klain%22, 15384, http://twitter.com/search?q=%22Ron+Klain%22], [Toobin,, Toobin, 21522, http://twitter.com/search?q=Toobin], [RIP MO3,, %22RIP+MO3%22, 30010, http://twitter.com/search?q=%22RIP+MO3%22], [SNKRS,, SNKRS,, http://twitter.com/search?q=SNKRS], [Bauer,, Bauer, 20520, http://twitter.com/search?q=Bauer], [DeWine,, DeWine, 11154, http://twitter.com/search?q=DeWine], [Sonny Gray,, %22Sonny+Gray%22,, http://twitter.com/search?q=%22Sonny+Gray%22], [Kawhi,, Kawhi,, http://twitter.com/search?q=Kawhi], [Ticketmaster,, Ticketmaster, 31253, http://twitter.com/search?q=Ticketmaster], [My YouTube,, %22My+YouTube%22, 158944, http://twitter.com/search?q=%22My+YouTube%22], [Reds,, Reds, 19674, http://twitter.com/search?q=Reds], [RIP YouTube,, %22RIP+YouTube%22,, http://twitter.com/search?q=%22RIP+YouTube%22], [Them 11s,, %22Them+11s%22,, http://twitter.com/search?q=%22Them+11s%22], [BIEBER,, BIEBER, 427613, http://twitter.com/search?q=BIEBER], [Damn Mo3,, %22Damn+Mo3%22, 14884, http://twitter.com/search?q=%22Damn+Mo3%22], [Darvish,, Darvish,, http://twitter.com/search?q=Darvish], [Chris Paul,, %22Chris+Paul%22, 13771, http://twitter.com/search?q=%22Chris+Paul%22], [YouTubeTV,, YouTubeTV, 109150, http://twitter.com/search?q=YouTubeTV], [My Lai,, %22My+Lai%22,, http://twitter.com/search?q=%22My+Lai%22], [Sydal,, Sydal,, http://twitter.com/search?q=Sydal], [Johnny Gargano,, %22Johnny+Gargano%22,, http://twitter.com/search?q=%22Johnny+Gargano%22], [Pending,, Pending, 24538, http://twitter.com/search?q=Pending], [Eastern Michigan,, %22Eastern+Michigan%22,, http://twitter.com/search?q=%22Eastern+Michigan%22], [Morey,, Morey,, http://twitter.com/search?q=Morey], [#OneChicago,, %23OneChicago,, http://twitter.com/search?q=%23OneChicago], [#TrumpIsPathetic,, %23TrumpIsPathetic, 16161, http://twitter.com/search?q=%23TrumpIsPathetic], [#AMAs,, %23AMAs, 2315388, http://twitter.com/search?q=%23AMAs], [#BTSMusicInnovator,, %23BTSMusicInnovator, 63185, http://twitter.com/search?q=%23BTSMusicInnovator], [#TheMaskedSinger,, %23TheMaskedSinger,, http://twitter.com/search?q=%23TheMaskedSinger], [#ChicagoMed,, %23ChicagoMed,, http://twitter.com/search?q=%23ChicagoMed], [#OperationWarpConcede,, %23OperationWarpConcede, 21682, http://twitter.com/search?q=%23OperationWarpConcede], [#CheerUpDonaldTrump,, %23CheerUpDonaldTrump,, http://twitter.com/search?q=%23CheerUpDonaldTrump], [#littlefreaks,, %23littlefreaks,, http://twitter.com/search?q=%23littlefreaks]]                    |
+//    |2020-11-13T01:38:23Z|2020-11-11T11:06:20Z|[[Houston, 2424766]]     |[[Dearra,, Dearra, 61618, http://twitter.com/search?q=Dearra], [Puerto Rico,, %22Puerto+Rico%22, 45611, http://twitter.com/search?q=%22Puerto+Rico%22], [Friday the 13th,, %22Friday+the+13th%22, 88823, http://twitter.com/search?q=%22Friday+the+13th%22], [Walmart,, Walmart, 184765, http://twitter.com/search?q=Walmart], [Megan,, Megan, 51835, http://twitter.com/search?q=Megan], [#theglowup,, %23theglowup,, http://twitter.com/search?q=%23theglowup], [Cold War,, %22Cold+War%22, 78462, http://twitter.com/search?q=%22Cold+War%22], [PlayStation,, PlayStation, 341863, http://twitter.com/search?q=PlayStation], [#Supernatural,, %23Supernatural, 28974, http://twitter.com/search?q=%23Supernatural], [#Station19,, %23Station19,, http://twitter.com/search?q=%23Station19], [#FreePS5,, %23FreePS5, 28889, http://twitter.com/search?q=%23FreePS5], [Colts,, Colts, 23617, http://twitter.com/search?q=Colts], [#ABetterTime,, %23ABetterTime, 226850, http://twitter.com/search?q=%23ABetterTime], [Davido,, Davido, 324300, http://twitter.com/search?q=Davido], [Rand Paul,, %22Rand+Paul%22, 12811, http://twitter.com/search?q=%22Rand+Paul%22], [Zuckerberg,, Zuckerberg, 47837, http://twitter.com/search?q=Zuckerberg], [greys anatomy,, %22greys+anatomy%22, 15892, http://twitter.com/search?q=%22greys+anatomy%22], [Senator,, Senator, 148713, http://twitter.com/search?q=Senator], [Danny Green,, %22Danny+Green%22,, http://twitter.com/search?q=%22Danny+Green%22], [Big Sur,, %22Big+Sur%22, 20049, http://twitter.com/search?q=%22Big+Sur%22], [Scotland,, Scotland, 183078, http://twitter.com/search?q=Scotland], [Demar,, Demar, 17024, http://twitter.com/search?q=Demar], [Mark Cuban,, %22Mark+Cuban%22,, http://twitter.com/search?q=%22Mark+Cuban%22], [The PS5,, %22The+PS5%22, 334349, http://twitter.com/search?q=%22The+PS5%22], [Freddie,, Freddie, 21739, http://twitter.com/search?q=Freddie], [Spurs,, Spurs, 26389, http://twitter.com/search?q=Spurs], [Cleo,, Cleo, 19164, http://twitter.com/search?q=Cleo], [Billie,, Billie, 156575, http://twitter.com/search?q=Billie], [Manchin,, Manchin, 27776, http://twitter.com/search?q=Manchin], [vernon,, vernon, 18473, http://twitter.com/search?q=vernon], [Pluto,, Pluto, 30237, http://twitter.com/search?q=Pluto], [Golden Goose,, %22Golden+Goose%22, 83701, http://twitter.com/search?q=%22Golden+Goose%22], [Sony,, Sony, 88680, http://twitter.com/search?q=Sony], [The Weeknd,, %22The+Weeknd%22, 50371, http://twitter.com/search?q=%22The+Weeknd%22], [Tiger,, Tiger, 78247, http://twitter.com/search?q=Tiger], [DMCA,, DMCA, 19739, http://twitter.com/search?q=DMCA], [Demon's Souls,, %22Demon%27s+Souls%22, 20562, http://twitter.com/search?q=%22Demon%27s+Souls%22], [Happy Founders,, %22Happy+Founders%22, 12024, http://twitter.com/search?q=%22Happy+Founders%22], [Kyler,, Kyler,, http://twitter.com/search?q=Kyler], [D'Onta Foreman,, %22D%27Onta+Foreman%22,, http://twitter.com/search?q=%22D%27Onta+Foreman%22], [Mikey Williams,, %22Mikey+Williams%22,, http://twitter.com/search?q=%22Mikey+Williams%22], [Jose Abreu,, %22Jose+Abreu%22, 14425, http://twitter.com/search?q=%22Jose+Abreu%22], [Oak Hill,, %22Oak+Hill%22,, http://twitter.com/search?q=%22Oak+Hill%22], [Ryan Tepera,, %22Ryan+Tepera%22,, http://twitter.com/search?q=%22Ryan+Tepera%22], [Tobin,, Tobin,, http://twitter.com/search?q=Tobin], [Corey Davis,, %22Corey+Davis%22,, http://twitter.com/search?q=%22Corey+Davis%22], [Ivy League,, %22Ivy+League%22,, http://twitter.com/search?q=%22Ivy+League%22], [AL MVP,, %22AL+MVP%22,, http://twitter.com/search?q=%22AL+MVP%22], [Holy Ground,, %22Holy+Ground%22, 36851, http://twitter.com/search?q=%22Holy+Ground%22], [AJ Brown,, %22AJ+Brown%22,, http://twitter.com/search?q=%22AJ+Brown%22]]|
+//    +--------------------+--------------------+-------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+//    val resDtypes = df.dtypes
+//    resDtypes.foreach(println)
+//
+//    df.dtypes output:
+//    (as_of,StringType)
+//    (created_at,StringType)
+//    (locations,ArrayType(StructType(StructField(name,StringType,true), StructField(woeid,LongType,true)),true))
+//    (trends,ArrayType(StructType(StructField(name,StringType,true), StructField(promoted_content,StringType,true), StructField(query,StringType,true), StructField(tweet_volume,LongType,true), StructField(url,StringType,true)),true))
+
+//    println(df.storageLevel)
+//    df.storageLevel output:
+//    StorageLevel(1 replicas)
+
+//    df.createOrReplaceTempView("trends")
+
+//    val locationTrendsDF = df.select($"locations.name", explode($"trends"))
+//    locationTrendsDF.show(false)
+
+//    val trendsDF = df.select(explode($"trends"))
+//    trendsDF.printSchema()
+//    trendsDF.show(false)
+
+//    printSchema() output:
+//    root
+//    |-- col: struct (nullable = true)
+//    |    |-- name: string (nullable = true)
+//    |    |-- promoted_content: string (nullable = true)
+//    |    |-- query: string (nullable = true)
+//    |    |-- tweet_volume: long (nullable = true)
+//    |    |-- url: string (nullable = true)
+
+//    trendsDF.show()
+//    +---------------------------------------------------------------------------------------+
+//    |col                                                                                    |
+//    +---------------------------------------------------------------------------------------+
+//    |[#YouTubeDOWN,, %23YouTubeDOWN, 127314, http://twitter.com/search?q=%23YouTubeDOWN]    |
+//    |[Harden,, Harden, 38722, http://twitter.com/search?q=Harden]                           |
+//    |[Westbrook,, Westbrook, 41754, http://twitter.com/search?q=Westbrook]                  |
+//    |[#VeteransDay,, %23VeteransDay, 429908, http://twitter.com/search?q=%23VeteransDay]    |
+//    |[Alaska,, Alaska, 203143, http://twitter.com/search?q=Alaska]                          |
+//    |[Journey Brown,, %22Journey+Brown%22,, http://twitter.com/search?q=%22Journey+Brown%22]|
+//    |[#AEWDynamite,, %23AEWDynamite,, http://twitter.com/search?q=%23AEWDynamite]           |
+//    |[#CMAawards,, %23CMAawards, 12027, http://twitter.com/search?q=%23CMAawards]           |
+//    |[#WWENXT,, %23WWENXT,, http://twitter.com/search?q=%23WWENXT]                          |
+//    |[Rockets,, Rockets, 38764, http://twitter.com/search?q=Rockets]                        |
+//    |[Mississippi,, Mississippi, 36259, http://twitter.com/search?q=Mississippi]            |
+//    |[Clippers,, Clippers, 14979, http://twitter.com/search?q=Clippers]                     |
+//    |[WWII,, WWII, 37228, http://twitter.com/search?q=WWII]                                 |
+//    |[Lakers,, Lakers, 25952, http://twitter.com/search?q=Lakers]                           |
+//    |[Cuomo,, Cuomo, 60866, http://twitter.com/search?q=Cuomo]                              |
+//    |[Knicks,, Knicks, 17485, http://twitter.com/search?q=Knicks]                           |
+//    |[Cy Young,, %22Cy+Young%22, 21783, http://twitter.com/search?q=%22Cy+Young%22]         |
+//    |[Ron Klain,, %22Ron+Klain%22, 15384, http://twitter.com/search?q=%22Ron+Klain%22]      |
+//    |[Toobin,, Toobin, 21522, http://twitter.com/search?q=Toobin]                           |
+//    |[RIP MO3,, %22RIP+MO3%22, 30010, http://twitter.com/search?q=%22RIP+MO3%22]            |
+//    +---------------------------------------------------------------------------------------+
+//    only showing top 20 rows
+
+//    val res = df.withColumn("trends", explode($"trends"))
+//      .select("*")
+//      .collect
+//      .map(row => {
+//        val locations:Row = row.getStruct(0)
+//        val location = locations.getString(0)
+//        println(location, row.getAs[String]("as_of"))
+//      })
+
+    def writeFile(lines: List[(Any, String, String, Int, Any)]) {
+      try {
+        val file = new File("output.txt")
+
+        if (!file.exists) file.createNewFile
+
+        val file_writer = new FileWriter(file, true)
+
+        val buffered_writer = new BufferedWriter(file_writer)
+        for (line <- lines) {
+          buffered_writer
+            .write("\"%s\",\"%s\",\"%s\",%d,%d\n"
+              .format(
+                line._1.toString,
+                line._2,
+                line._3,
+                line._4,
+                { if (null == line._5) 0 else line._5.toString.toInt }
+              ))
+        }
+        buffered_writer.close()
+      } catch {
+        case e: IOException => println("IOException: Could not write to file")
+      }
+    }
+
+    println("---------------------"+df.count())
+    val colData = df.select("*").cache()
+
+    colData.foreach(row => {
+      val as_of = row.getString(0)
+      val location = row
+        .getAs[mutable.WrappedArray[Row]](2)
+        .map(struct => struct(0))
+        .mkString
+//      val volume = row
+//        .getAs[mutable.WrappedArray[Row]](3)
+//        .map(struct => struct(3))
+      val trends = row
+        .getAs[mutable.WrappedArray[Row]](3)
+        .zipWithIndex.map { case (struct, index) =>
+        // trend text, location, time stamp, rank, tweet volume
+        (struct(0), location, as_of, index + 1, struct(3))
+      }.toList
+//      (2020-11-12T01:15:14Z,Philadelphia,WrappedArray(127314, 38722, 41754, 429908, 203143, null, null, 12027, null, 38764, 36259, 14979, 37228, 25952, 60866, 17485, 21783, 15384, 21522, 30010, null, 20520, 11154, null, null, 31253, 158944, 19674, null, null, 427613, 14884, null, 13771, 109150, null, null, null, 24538, null, null, null, 16161, 2315388, 63185, null, null, 21682, null, null))
+//      val trend_names = row.getAs[mutable.WrappedArray[Row]](3).map(struct => struct(0)).toList
+//      (2020-11-12T01:15:14Z,Philadelphia,List(#YouTubeDOWN, Harden, Westbrook, #VeteransDay, Alaska, Journey Brown, #AEWDynamite, #CMAawards, #WWENXT, Rockets, Mississippi, Clippers, WWII, Lakers, Cuomo, Knicks, Cy Young, Ron Klain, Toobin, RIP MO3, SNKRS, Bauer, DeWine, Sonny Gray, Kawhi, Ticketmaster, My YouTube, Reds, RIP YouTube, Them 11s, BIEBER, Damn Mo3, Darvish, Chris Paul, YouTubeTV, My Lai, Sydal, Johnny Gargano, Pending, Eastern Michigan, Morey, #OneChicago, #TrumpIsPathetic, #AMAs, #BTSMusicInnovator, #TheMaskedSinger, #ChicagoMed, #OperationWarpConcede, #CheerUpDonaldTrump, #littlefreaks))
+
+      writeFile(trends)
+
+    })
+
+    spark.stop()
+//    |-- as_of: string (nullable = true)
+//    |-- created_at: string (nullable = true)
+//    |-- locations: array (nullable = true)
+//    |    |-- element: struct (containsNull = true)
+//    |    |    |-- name: string (nullable = true)
+//    |    |    |-- woeid: long (nullable = true)
+//    |-- trends: array (nullable = true)
+//    |    |-- element: struct (containsNull = true)
+//    |    |    |-- name: string (nullable = true)
+//    |    |    |-- promoted_content: string (nullable = true)
+//    |    |    |-- query: string (nullable = true)
+//    |    |    |-- tweet_volume: long (nullable = true)
+//    |    |    |-- url: string (nullable = true)"
+
+
+//    res.show(false)
+//
+//    val res2 = res.select(res.col("trends.name"))
+//
+//    res2.show(false)
+//    val res3 = res2.collect.map(_.toSeq)
+//    this doesn't work, wrappedArray -^
+//    val res3 = res2.collect.map(row => row.getString(0))
+//      this works -^
+//      below works -.
+//    val res3 = res2.collect.flatMap(_.toSeq)
+//
+//    res3.foreach(println)
+//    println(res3.length)
+
+  }
+}
+
+
