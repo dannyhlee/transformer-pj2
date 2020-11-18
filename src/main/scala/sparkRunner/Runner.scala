@@ -34,7 +34,7 @@ object Runner {
 
     def writeFile(lines: List[(Any, String, String, Int, Any)]) {
       try {
-        val file = new File("output.txt")
+        val file = new File("output.csv")
 
         if (!file.exists) file.createNewFile
 
