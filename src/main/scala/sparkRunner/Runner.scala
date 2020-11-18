@@ -41,6 +41,10 @@ object Runner {
         val file_writer = new FileWriter(file, true)
 
         val buffered_writer = new BufferedWriter(file_writer)
+
+        buffered_writer
+          .write("\"Trend Text\",\"Location\",\"Timestamp\",\"Rank\",\"Tweet Volume\"\n")
+
         for (line <- lines) {
           buffered_writer
             .write("\"%s\",\"%s\",\"%s\",%d,%d\n"
