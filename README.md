@@ -1,4 +1,4 @@
-### This is a **submodule** of our [main project 2 repository](https://github.com/EdwardReed1/revature_project_2) at [EdwardReed1](https://github.com/EdwardReed1) Github.
+### This is a **submodule** of our [main project 2 repository](https://github.com/EdwardReed1/revature_project_2) at [EdwardReed1](https://github.com/EdwardReed1)'s Github page.
 
 ## pj2 SparkRunner
 
