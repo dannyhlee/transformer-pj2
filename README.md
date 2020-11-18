@@ -1,3 +1,5 @@
+### This is a **submodule** of our [main project 2 repository](https://github.com/EdwardReed1/revature_project_2) at [EdwardReed1](https://github.com/EdwardReed1) Github.
+
 ## pj2 SparkRunner
 
 #### I. Description
@@ -12,6 +14,9 @@ A spark runner file
 6. Connected MongoDb - code in src/MongoDB.txt (11/14) 
 7. Added TrendObj case class (name, location, rank, as_of)
 8. Extract Trend names from Nested Struct(11/15)
+9. Output (trend text, location, time stamp, rank, tweet volume) as a 5-tuple (11/16)
+10. Write tuple as CSV file to text file (process files or directories)
+11. Process data, produce single trend case class object (IV.1)
 
 figure a:
 ```
@@ -33,7 +38,6 @@ figure a:
 
 #### III. Doing
 1. SQL queries
-2. Process data, produce single trend case class object (IV.1)
 3. Generate SQL - single topic rank change over time in a specific geo
 4. Generate SQL - location change of a topic over time
 5. Generate index measuring proximity between geos
