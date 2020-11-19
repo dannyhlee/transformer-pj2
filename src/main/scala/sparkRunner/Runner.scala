@@ -1,6 +1,6 @@
 package sparkRunner
 
-import java.io.{BufferedWriter, File, FileNotFoundException, FileWriter, IOException, PrintWriter}
+import java.io.{BufferedWriter, File, FileWriter, IOException}
 
 import scala.collection.mutable
 import org.apache.spark.sql.types._
@@ -60,6 +60,7 @@ object Runner {
         val buffered_writer = new BufferedWriter(file_writer)
 
         for (line <- lines) {
+          println(line._3.toString, line._3.toString.substring(0, 10), line._3.toString.substring(11, 13) )
           breakable {
             if (line.productArity != 5) break
             else if (line._3.toString.length != 20) break
@@ -68,14 +69,14 @@ object Runner {
               buffered_writer
                 // trend_name, location, date, hour, rank, tweet_volume
                 .write("\"%s\",\"%s\",\"%s\",\"%s\",%d,%d\n"
-                  .format(line._1, line._2, line._3.toString.substring(0, 9),
+                  .format(line._1, line._2, line._3.toString.substring(0, 10),
                     line._3.toString.substring(11, 13), line._4, line._5))
             }
           }
         }
         buffered_writer.close()
       } catch {
-        case e: IOException => println("IOException: Could not write to file")
+        case e: IOException => println(s"IOException: ${e.getMessage}")
       }
     }
 
