@@ -6,6 +6,8 @@ import scala.collection.mutable
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Row, SparkSession}
 
+import scala.util.control.Breaks.{break, breakable}
+
 object Runner {
 
   def main(args: Array[String]): Unit = {
@@ -43,11 +45,11 @@ object Runner {
     val buffered_writer = new BufferedWriter(file_writer)
 
 //    buffered_writer
-//      .write("\"Trend Text\",\"Location\",\"Timestamp\",\"Rank\",\"Tweet Volume\"\n")
+//      .write("\"Trend Name\",\"Location\",\"Date\",\"Time\",\"Rank\",\"Tweet Volume\"\n")
 
     buffered_writer.close()
 
-    def writeFile(lines: List[(Any, Any, Any, Int, Int)]) {
+    def writeFile(lines: List[(Any, Any, Any, Long, Long)]) {
       try {
         val file = new File("output.csv")
 
@@ -58,15 +60,18 @@ object Runner {
         val buffered_writer = new BufferedWriter(file_writer)
 
         for (line <- lines) {
-          buffered_writer
-            .write("\"%s\",\"%s\",\"%s\",%d,%d\n"
-              .format(
-                { if (null == line._1) 0 else line._1.toString },
-                { if (null == line._2) 0 else line._2 },
-                { if (null == line._3) 0 else line._3 },
-                { if (null == line._4) 0 else line._4 },
-                { if (null == line._5) 0 else line._5.toString.toInt }
-              ))
+          breakable {
+            if (line.productArity != 5) break
+            else if (line._3.toString.length != 20) break
+            else {
+              println("writing...")
+              buffered_writer
+                // trend_name, location, date, hour, rank, tweet_volume
+                .write("\"%s\",\"%s\",\"%s\",\"%s\",%d,%d\n"
+                  .format(line._1, line._2, line._3.toString.substring(0, 9),
+                    line._3.toString.substring(11, 13), line._4, line._5))
+            }
+          }
         }
         buffered_writer.close()
       } catch {
@@ -89,22 +94,19 @@ object Runner {
         .getAs[mutable.WrappedArray[Row]](3)
         .zipWithIndex.map { case (struct, index) =>
         // trend text, location, time stamp, rank, tweet volume
-
         (
-          { if (null == struct(0)) 0 else struct(0) },
-          { if (null == location) 0 else location },
-          { if (null == as_of) 0 else as_of },
-          { if (null == index + 1) 0 else index + 1 },
-          { if (null == struct(3)) 0 else struct(3).toString.toInt }
+          { if (null == struct(0)) "" else struct(0).toString },
+          { if (null == location) "" else location },
+          { if (null == as_of) ""  else as_of },
+          (index + 1).toLong,
+          { if (null == struct(3)) 0.toLong
+            else if(!struct(3).toString.forall(_.isDigit)) 0.toLong
+            else struct(3).toString.toLong }
         )
       }.toList
 
       writeFile(trends)
-
     })
-
-
-
   }
 }
 
