@@ -1,0 +1,65 @@
+import org.mongodb.scala._
+import org.mongodb.scala.{MongoClient, MongoCollection, Observable}
+import org.mongodb.scala.bson.codecs.Macros._
+import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
+import org.mongodb.scala.bson.BsonNull
+import org.mongodb.scala.model.Aggregates.limit
+import org.mongodb.scala.model.Filters
+
+import scala.concurrent.Await
+import scala.concurrent.duration.{Duration, SECONDS}
+import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Updates._
+import org.mongodb.scala.model.Sorts._
+import org.mongodb.scala.model.Projections._
+
+    val codecRegistry = fromRegistries(fromProviders(classOf[TrendObj]), MongoClient.DEFAULT_CODEC_REGISTRY)
+
+    val uri: String = "mongodb+srv://pj2_admin:mB5gYf2O1pxUyZhl@cluster0.e2yuz.mongodb.net/pj2?retryWrites=true&w=majority"
+    System.setProperty("org.mongodb.async.type", "netty")
+    val client: MongoClient = MongoClient(uri)
+    val db: MongoDatabase = client.getDatabase("pj2").withCodecRegistry(codecRegistry)
+    val collection: MongoCollection[TrendObj] = db.getCollection("trends")
+
+    // helper functions for access and printing, to get us started + skip the Observable data type
+    def getResults[T](obs: Observable[T]): Seq[T] = {
+      Await.result(obs.toFuture(), Duration(10, SECONDS))
+    }
+
+    def printResults[T](obs: Observable[T]): Unit = {
+      getResults(obs).foreach(println(_))
+    }
+
+    printResults(collection.insertOne(TrendObj("NFL", "Houston", 3, "time", "time")))
+    printResults(collection.find())
+    printResults(collection.insertMany(List(
+      TrendObj("Strangers in Paradise", Some(1993)),
+      TrendObj("Archie TrendObjs", Some(1942)),
+      TrendObj("Scooby Apocolypse", Some(2016)),
+      TrendObj("Eightball", Some(1989)),
+      TrendObj("Adam's TrendObj", None))))
+    printResults(collection.find(equal("title", "spiderman")))
+    printResults(collection.find(Filters.gt("year", 2000)))
+    printResults(collection.find(Filters.exists("year", exists = true)))
+    printResults(collection.find(notEqual("year", new BsonNull())))
+    printResults((collection.find(and(gt("year", 1970), lt("year", 1990)))))
+    printResults((collection.find(or(gt("year", 1990), equal("title", "Eightball")))))
+    printResults(collection.updateOne(equal("title", "Adam's TrendObj"),
+      set("title", "Best TrendObj!")
+    ))
+    printResults(collection.updateMany(gt("year", 1980),
+      set("title", "New TrendObj!")
+    ))
+    printResults(collection.updateMany(gt("year", 1980), combine(set("title", "borg TrendObj!"), set("year", 2222))))
+    val archieTrendObj = getResults(collection.find(equal("title", "Archie TrendObjs")))(0)
+    println(archieTrendObj)
+    printResults(collection.replaceOne(equal("title", "Archie TrendObjs"),
+      archieTrendObj.copy(title="Replacement title", year = Some(1998))
+    ))
+    printResults(collection
+      .find(notEqual("year", new BsonNull())))
+      .sort(orderBy(ascending("year")))
+      .limit(3)
+    printResults(collection.find().projection(include("title")))
+    printResults(collection.find().projection(include("title", "year")))
+    client.close()
