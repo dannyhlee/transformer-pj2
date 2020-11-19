@@ -38,6 +38,7 @@ figure a:
 
 #### III. Doing
 1. SQL queries (assigned: Edward)
+2. Spark Streaming of Twitter request (assigned: Nahshon)
 3. Generate SQL - single topic rank change over time in a specific geo
 4. Generate SQL - location change of a topic over time
 5. Generate index measuring proximity between geos?
