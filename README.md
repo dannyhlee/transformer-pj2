@@ -53,5 +53,6 @@ figure a:
 
 
 #### V. Links to resources:
-- Sample data (gDrive): [sample-trend-data-11_13-19_20202.tar.gz](https://drive.google.com/file/d/1fN3BjOMfke32r7TVxRaNu-1yT9JtYYah/view?usp=sharing) 823kb gzipped, 13mb unzipped 
-- Larger sample data set (gDrive):  [sample-trend-data_larger_response_set.tar.gz](https://drive.google.com/file/d/1DHmJCIs2r4OK4BBj6d-uFtGiFX1jSLNO/view?usp=sharing) 2mb gzipped, 54mb expanded 
+- Sample data (gDrive): [sample-trend-data-11_13-19_20202.tar.gz](https://drive.google.com/file/d/1fN3BjOMfke32r7TVxRaNu-1yT9JtYYah/view?usp=sharing) 823kb gzipped, 13mb unzipped.
+- Larger sample data set (gDrive):  [sample-trend-data_larger_response_set.tar.gz](https://drive.google.com/file/d/1DHmJCIs2r4OK4BBj6d-uFtGiFX1jSLNO/view?usp=sharing) 2mb gzipped, 54mb unzipped.
+- Consolidated all data to one file (gDrive): [sample_trend_data_whole_set.tar.gz](https://drive.google.com/file/d/1jeaPTZlcY1JbZh3W_J6T1Xv1M09eAXrp/view?usp=sharing) 3.2mb,  67mb unzipped.
