@@ -11,6 +11,13 @@ import scala.util.control.Breaks.{break, breakable}
 object Runner {
 
   def main(args: Array[String]): Unit = {
+    if (args.length != 2) {
+      throw new IllegalArgumentException(
+        "Exactly 2 arguments are required: <inputPath> <outputPath>")
+    }
+
+    val inputPath = args(0)
+    val outputPath = args(1)
 
     val spark = SparkSession.builder()
       .appName("Spark Runner")
@@ -34,9 +41,10 @@ object Runner {
           .add("url", StringType)
         ))
 
-    val df = spark.read.schema(trendSchema).json("input")
+    println("read file")
+    val df = spark.read.schema(trendSchema).json(inputPath)
 
-    val file = new File("output.csv")
+    val file = new File(outputPath)
 
     if (!file.exists) file.createNewFile
 
@@ -51,7 +59,7 @@ object Runner {
 
     def writeFile(lines: List[(Any, Any, Any, Long, Long)]) {
       try {
-        val file = new File("output.csv")
+        val file = new File(outputPath)
 
         if (!file.exists) file.createNewFile
 
