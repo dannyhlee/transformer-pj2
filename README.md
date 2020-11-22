@@ -50,3 +50,8 @@ figure a:
    * Analyze rank and rank change between locations over time
 2. Chart change graphically per topic
 3. Chart location list that changes over time
+
+
+#### V. Links to resources:
+- Sample data (gDrive): [sample-trend-data-11_13-19_20202.tar.gz](https://drive.google.com/file/d/1fN3BjOMfke32r7TVxRaNu-1yT9JtYYah/view?usp=sharing) 823kb gzipped, 13mb unzipped 
+- Larger sample data set (gDrive):  [sample-trend-data_larger_response_set.tar.gz](https://drive.google.com/file/d/1DHmJCIs2r4OK4BBj6d-uFtGiFX1jSLNO/view?usp=sharing) 2mb gzipped, 54mb expanded 
